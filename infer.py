@@ -38,6 +38,13 @@ parser.add_argument(
     default="./test-infer/",
     help="The output directory where predictions are saved",
 )
+parser.add_argument(
+    "--condition_image",
+    type=str,
+    default=None,
+    required=True,
+    help="The directory of the condition image",
+)
 parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible inference.")
 
 args = parser.parse_args()
@@ -47,8 +54,22 @@ if __name__ == "__main__":
     generator = None 
 
     # create & load model
+    '''
     pipe = StableDiffusionInpaintPipeline.from_pretrained(
         "stabilityai/stable-diffusion-2-inpainting",
+        torch_dtype=torch.float32,
+        revision=None
+    )
+    '''
+    
+    controlnet = ControlNetModel.from_pretrained(
+        "fusing/stable-diffusion-v1-5-controlnet-openpose",
+        torch_dtype=torch.float32
+    )
+
+    pipe = StableDiffusionControlNetPipeline.from_pretrained(
+        "stabilityai/stable-diffusion-2-inpainting",
+        controlnet=controlnet,
         torch_dtype=torch.float32,
         revision=None
     )
@@ -68,9 +89,18 @@ if __name__ == "__main__":
     image = Image.open(args.validation_image)
     mask_image = Image.open(args.validation_mask)
 
+    from controlnet_aux import OpenPoseDetector
+    model = OpenPoseDetector.from_pretrained("lllyasviel/ControlNet")
+    pose = model(args.condition_image)
+
     results = pipe(
-        ["a photo of sks"] * 16, image=image, mask_image=mask_image, 
-        num_inference_steps=200, guidance_scale=1, generator=generator, 
+        ["a photo of sks"] * 16, 
+        pose,
+        image=image, 
+        mask_image=mask_image, 
+        num_inference_steps=200, 
+        guidance_scale=1, 
+        generator=generator, 
     ).images
 
     erode_kernel = ImageFilter.MaxFilter(3)
