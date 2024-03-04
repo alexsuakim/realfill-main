@@ -31,7 +31,6 @@ from diffusers import (
     DDPMScheduler,
     StableDiffusionInpaintPipeline,
     UNet2DConditionModel,
-    ControlNetModel,
 )
 from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version, is_wandb_available
@@ -113,7 +112,6 @@ def log_validation(
         args.pretrained_model_name_or_path,
         tokenizer=tokenizer,
         revision=args.revision,
-        controlnet=controlnet,
     )
 
     # set `keep_fp32_wrapper` to True because we do not want to remove
@@ -586,31 +584,10 @@ def main(args):
     text_encoder = CLIPTextModel.from_pretrained(
         args.pretrained_model_name_or_path, subfolder="text_encoder", revision=args.revision
     )
-    vae  = AutoencoderKL.from_pretrained(
-        args.pretrained_model_name_or_path, subfolder="vae", revision=args.revision
-    )
+    vae = AutoencoderKL.from_pretrained(args.pretrained_model_name_or_path, subfolder="vae", revision=args.revision)
     unet = UNet2DConditionModel.from_pretrained(
         args.pretrained_model_name_or_path, subfolder="unet", revision=args.revision
     )
-
-    vae = AutoencoderKL.from_pretrained(
-        args.pretrained_model_name_or_path, subfolder="vae", revision=args.revision, variant=args.variant
-    )
-    unet = UNet2DConditionModel.from_pretrained(
-        args.pretrained_model_name_or_path, subfolder="unet", revision=args.revision, variant=args.variant
-    )
-
-    if args.controlnet_model_name_or_path:
-        logger.info("Loading existing controlnet weights")
-        controlnet = ControlNetModel.from_pretrained(args.controlnet_model_name_or_path)
-    else:
-        logger.info("Initializing controlnet weights from unet")
-        controlnet = ControlNetModel.from_unet(unet)
-
-
-
-
-
 
     config = LoraConfig(
         r=args.lora_rank,
