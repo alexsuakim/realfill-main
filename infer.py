@@ -62,6 +62,8 @@ if __name__ == "__main__":
     )
     '''
     
+    from diffusers import StableDiffusionControlNetPipeline, ControlNetModel
+
     controlnet = ControlNetModel.from_pretrained(
         "fusing/stable-diffusion-v1-5-controlnet-openpose",
         torch_dtype=torch.float32
