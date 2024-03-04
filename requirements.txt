@@ -7,3 +7,6 @@ torchvision==0.15.2
 ftfy==6.1.1
 tensorboard==2.14.0
 Jinja2==3.1.2
+xformers
+opencv-contrib-python
+controlnet_aux
