@@ -91,8 +91,8 @@ if __name__ == "__main__":
     image = Image.open(args.validation_image)
     mask_image = Image.open(args.validation_mask)
 
-    from controlnet_aux import OpenPoseDetector
-    model = OpenPoseDetector.from_pretrained("lllyasviel/ControlNet")
+    from controlnet_aux import OpenposeDetector
+    model = OpenposeDetector.from_pretrained("lllyasviel/ControlNet")
     pose = model(args.condition_image)
 
     results = pipe(
